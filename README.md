@@ -1,4 +1,4 @@
-# MakaziHub — Module 1: Database Schema & Migrations
+# MakaziHub
 
 ## What's Included
 
@@ -107,6 +107,3 @@ Generated → unpaid
 | maintenance | #D97706  | #FEF3C7    |
 
 ---
-
-## Next Module
-**Module 2** → Laravel project structure, routing, middleware, and role-based access control.
