@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    /* Fonts */
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+
+    /* Brand - Deep Navy */
+    --color-navy-100: #E2E8F0;
+    --color-navy-400: #334155;
+    --color-navy-500: #1E293B;
+    --color-navy-600: #0F172A;
+
+    /* Accent - Emerald */
+    --color-brand-100: #D1FAE5;
+    --color-brand-400: #34D399;
+    --color-brand-500: #10B981;
+    --color-brand-600: #059669;
+
+    /* Status */
+    --color-success: #16A34A;
+    --color-success-bg: #DCFCE7;
+    --color-warning: #D97706;
+    --color-warning-bg: #FEF3C7;
+    --color-danger: #DC2626;
+    --color-danger-bg: #FEE2E2;
+    --color-info: #2563EB;
+    --color-info-bg: #DBEAFE;
+
+    /* Neutrals */
+    --color-surface: #F8FAFC;
+    --color-card: #FFFFFF;
+    --color-border: #E2E8F0;
+    --color-divider: #CBD5E1;
+
+    /* Text */
+    --color-primary: #111827;
+    --color-secondary: #475569;
+    --color-muted: #94A3B8;
+}
