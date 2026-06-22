@@ -22,9 +22,7 @@ class TenantController extends Controller
         $manager = auth()->user();
 
         $query = Tenant::with(['user', 'unit.property'])
-            ->whereHas('unit.property', function ($q) use ($manager) {
-                $q->where('manager_id', $manager->id);
-            });
+            ->where('manager_id', $manager->id);
 
         // Filter by property
         if ($request->filled('property_id')) {
@@ -72,6 +70,8 @@ class TenantController extends Controller
      */
     public function store(Request $request)
     {
+        $manager = auth()->user();
+
         $request->validate([
             'name'                    => 'required|string|max:255',
             'email'                   => 'required|email|unique:users,email',
@@ -84,7 +84,7 @@ class TenantController extends Controller
             'notes'                   => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($request, $manager) {
             // Create the user account
             $user = User::create([
                 'name'     => $request->name,
@@ -99,6 +99,7 @@ class TenantController extends Controller
             // Create the tenant profile
             Tenant::create([
                 'user_id'                 => $user->id,
+                'manager_id'              => $manager->id,
                 'id_number'               => $request->id_number,
                 'emergency_contact_name'  => $request->emergency_contact_name,
                 'emergency_contact_phone' => $request->emergency_contact_phone,

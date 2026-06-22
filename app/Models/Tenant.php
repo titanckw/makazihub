@@ -12,6 +12,7 @@ class Tenant extends Model
 {
     protected $fillable = [
         'user_id',
+        'manager_id',
         'unit_id',
         'id_number',
         'emergency_contact_name',
@@ -25,6 +26,11 @@ class Tenant extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
     public function unit(): BelongsTo
