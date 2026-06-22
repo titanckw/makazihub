@@ -23,6 +23,7 @@ Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download']
 // Payments
 Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
 Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
 
 // Receipts
 Route::get('receipts/{receipt}/download', [ReceiptController::class, 'download'])->name('receipts.download');

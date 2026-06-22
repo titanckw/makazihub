@@ -98,6 +98,13 @@
                             <span class="text-muted">Amount Paid</span>
                             <span class="font-bold text-success">KES {{ number_format($invoice->amount_paid, 2) }}</span>
                         </div>
+                        @if($invoice->status === 'partial' && $invoice->expected_completion_date)
+                            <div class="flex justify-between">
+                                <span class="text-muted">Expected completion</span>
+                                <span
+                                    class="font-bold text-primary">{{ $invoice->expected_completion_date->format('d M Y') }}</span>
+                            </div>
+                        @endif
                         <div class="flex justify-between border-t border-border pt-3">
                             <span class="font-semibold text-primary">Balance Due</span>
                             <span class="font-bold text-lg {{ $invoice->balance > 0 ? 'text-danger' : 'text-success' }}">

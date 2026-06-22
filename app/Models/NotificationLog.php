@@ -20,10 +20,12 @@ class NotificationLog extends Model
         'status',       // sent | failed | pending
         'raw_response',
         'sent_at',
+        'read_at',
     ];
 
     protected $casts = [
         'sent_at' => 'datetime',
+        'read_at' => 'datetime',
     ];
 
     // ── Relationships ──────────────────────────────────────────────

@@ -40,4 +40,15 @@ class NotificationsController extends Controller
             'layout'
         ));
     }
+
+    public function markAsRead(Request $request, NotificationLog $notification)
+    {
+        abort_unless($notification->user_id === auth()->id(), 403);
+
+        if (!$notification->read_at) {
+            $notification->update(['read_at' => now()]);
+        }
+
+        return response()->json(['success' => true, 'read_at' => $notification->read_at]);
+    }
 }

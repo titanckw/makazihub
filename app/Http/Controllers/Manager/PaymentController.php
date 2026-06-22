@@ -69,14 +69,15 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'invoice_id'     => 'required|exists:invoices,id',
-            'amount'         => 'required|numeric|min:1',
-            'payment_method' => 'required|in:mpesa,cash,bank_transfer,cheque',
-            'reference'      => 'nullable|string|max:100',
-            'mpesa_receipt'  => 'nullable|string|max:20',
-            'phone_number'   => 'nullable|string|max:15',
-            'paid_at'        => 'required|date',
-            'notes'          => 'nullable|string|max:500',
+            'invoice_id'                => 'required|exists:invoices,id',
+            'amount'                    => 'required|numeric|min:1',
+            'payment_method'            => 'required|in:mpesa,cash,bank_transfer,cheque',
+            'reference'                 => 'nullable|string|max:100',
+            'mpesa_receipt'             => 'nullable|string|max:20',
+            'phone_number'              => 'nullable|string|max:15',
+            'paid_at'                   => 'required|date',
+            'expected_completion_date'  => 'nullable|date|after_or_equal:paid_at',
+            'notes'                     => 'nullable|string|max:500',
         ]);
 
         $invoice = Invoice::findOrFail($request->invoice_id);

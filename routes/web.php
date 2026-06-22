@@ -40,3 +40,6 @@ Route::prefix('tenant')
 
 
 Route::post('/mpesa/callback', [\App\Http\Controllers\Manager\PaymentController::class, 'mpesaCallback']);
+
+Route::middleware(['auth'])->post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationsController::class, 'markAsRead'])
+    ->name('notifications.read');

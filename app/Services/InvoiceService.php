@@ -114,10 +114,18 @@ class InvoiceService
             $newAmountPaid = $invoice->amount_paid + $payment->amount;
             $newStatus = $this->resolveInvoiceStatus((float) $invoice->total_amount, $newAmountPaid, Carbon::parse($invoice->due_date));
 
-            $invoice->update([
+            $invoiceUpdates = [
                 'amount_paid' => $newAmountPaid,
                 'status' => $newStatus,
-            ]);
+            ];
+
+            if ($newStatus === 'partial') {
+                $invoiceUpdates['expected_completion_date'] = $data['expected_completion_date'] ?? $invoice->expected_completion_date;
+            } else {
+                $invoiceUpdates['expected_completion_date'] = null;
+            }
+
+            $invoice->update($invoiceUpdates);
 
             // Auto-generate receipt
             Receipt::create([

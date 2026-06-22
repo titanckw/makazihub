@@ -21,13 +21,15 @@ class Invoice extends Model
         'late_fee',
         'total_amount',
         'amount_paid',
+        'balance',
         'due_date',
         'period_start',
         'period_end',
-        'status',       // unpaid | partial | paid | overdue
         'invoice_date',
         'billing_period',
+        'status',       // unpaid | partial | paid | overdue
         'notes',
+        'expected_completion_date',
         'generated_by', // manual | auto
     ];
 
@@ -35,6 +37,7 @@ class Invoice extends Model
         'due_date' => 'date',
         'period_start' => 'date',
         'period_end' => 'date',
+        'expected_completion_date' => 'date',
         'amount_due' => 'decimal:2',
         'late_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',

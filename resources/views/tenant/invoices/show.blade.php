@@ -71,6 +71,12 @@
                         <span class="font-bold text-success">KES {{ number_format($invoice->amount_paid, 2) }}</span>
                     </div>
                 @endif
+                @if($invoice->status === 'partial' && $invoice->expected_completion_date)
+                    <div class="flex justify-between text-sm py-2 border-b border-border">
+                        <span class="text-muted">Expected completion</span>
+                        <span class="font-bold text-primary">{{ $invoice->expected_completion_date->format('d M Y') }}</span>
+                    </div>
+                @endif
                 @if($invoice->balance > 0)
                     <div class="flex justify-between text-sm py-2 border-b border-border">
                         <span class="text-muted">Balance Due</span>
@@ -146,31 +152,106 @@
                 </form>
             </div>
 
-            {{-- Manual / Paybill instructions --}}
+            {{-- Manual / Paybill / Till instructions --}}
             <div class="bg-card rounded-2xl shadow-sm border border-border p-5">
-                <h2 class="font-semibold text-primary mb-3">Or Pay via Paybill</h2>
+                <h2 class="font-semibold text-primary mb-3">Or Pay via Paybill / Till</h2>
                 <div class="space-y-2 text-sm text-secondary">
                     <div class="flex items-start gap-3">
                         <span
                             class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
-                        <p>Go to <strong>M-Pesa → Lipa na M-Pesa → Pay Bill</strong></p>
+                        <p>Go to <strong>M-Pesa → Lipa na M-Pesa</strong></p>
                     </div>
+                    @if(config('mpesa.paybill'))
+                        <div class="flex items-start gap-3">
+                            <span
+                                class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                            <p>Paybill: <strong class="text-primary font-mono">{{ config('mpesa.paybill') }}</strong></p>
+                        </div>
+                    @endif
+                    @if(config('mpesa.till'))
+                        <div class="flex items-start gap-3">
+                            <span
+                                class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{{ config('mpesa.paybill') ? '3' : '2' }}</span>
+                            <p>Till: <strong class="text-primary font-mono">{{ config('mpesa.till') }}</strong></p>
+                        </div>
+                    @endif
                     <div class="flex items-start gap-3">
                         <span
-                            class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
-                        <p>Business No: <strong class="text-primary font-mono">{{ config('mpesa.paybill', '—') }}</strong></p>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <span
-                            class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                            class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{{ (config('mpesa.paybill') && config('mpesa.till')) ? '4' : '3' }}</span>
                         <p>Account No: <strong class="text-primary font-mono">{{ $invoice->unit->unit_number }}</strong></p>
                     </div>
                     <div class="flex items-start gap-3">
                         <span
-                            class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                            class="w-6 h-6 rounded-full bg-navy-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{{ (config('mpesa.paybill') && config('mpesa.till')) ? '5' : '4' }}</span>
                         <p>Amount: <strong class="text-primary">KES {{ number_format($invoice->balance, 2) }}</strong></p>
                     </div>
                 </div>
+            </div>
+
+            <div class="bg-card rounded-2xl shadow-sm border border-border p-5">
+                <h2 class="font-semibold text-primary mb-3">Record a manual payment</h2>
+                <p class="text-sm text-muted mb-4">Use this form when you've paid by Paybill/Till, bank transfer, cheque, or cash.</p>
+                <form method="POST" action="{{ route('tenant.payments.store') }}" class="space-y-5">
+                    @csrf
+                    <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="block text-sm text-secondary">
+                            <span class="font-medium text-primary">Amount Paid</span>
+                            <input type="number" name="amount" value="{{ old('amount', $invoice->balance) }}" min="1" step="0.01" required
+                                class="mt-2 w-full rounded-xl border border-border px-4 py-2 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </label>
+                        <label class="block text-sm text-secondary">
+                            <span class="font-medium text-primary">Payment Method</span>
+                            <select name="payment_method" required
+                                class="mt-2 w-full rounded-xl border border-border px-4 py-2 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                                <option value="cash" {{ old('payment_method') === 'cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="bank_transfer" {{ old('payment_method') === 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                <option value="cheque" {{ old('payment_method') === 'cheque' ? 'selected' : '' }}>Cheque</option>
+                                <option value="mpesa" {{ old('payment_method') === 'mpesa' ? 'selected' : '' }}>M-Pesa Paybill/Till</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="block text-sm text-secondary">
+                            <span class="font-medium text-primary">Payment Date</span>
+                            <input type="date" name="paid_at" value="{{ old('paid_at', now()->toDateString()) }}" required
+                                class="mt-2 w-full rounded-xl border border-border px-4 py-2 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </label>
+                        <label class="block text-sm text-secondary">
+                            <span class="font-medium text-primary">Expected Completion Date</span>
+                            <input type="date" name="expected_completion_date" value="{{ old('expected_completion_date') }}"
+                                class="mt-2 w-full rounded-xl border border-border px-4 py-2 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                            <span class="text-xs text-muted">Optional if this is a partial payment.</span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="block text-sm text-secondary">
+                            <span class="font-medium text-primary">Reference / Receipt No.</span>
+                            <input type="text" name="reference" value="{{ old('reference') }}"
+                                class="mt-2 w-full rounded-xl border border-border px-4 py-2 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </label>
+                        <label class="block text-sm text-secondary">
+                            <span class="font-medium text-primary">M-Pesa Receipt</span>
+                            <input type="text" name="mpesa_receipt" value="{{ old('mpesa_receipt') }}"
+                                class="mt-2 w-full rounded-xl border border-border px-4 py-2 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </label>
+                    </div>
+
+                    <label class="block text-sm text-secondary">
+                        <span class="font-medium text-primary">Notes</span>
+                        <textarea name="notes" rows="3"
+                            class="mt-2 w-full rounded-2xl border border-border px-4 py-3 text-sm text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">{{ old('notes') }}</textarea>
+                    </label>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="text-xs text-muted">Outstanding balance: <strong>KES {{ number_format($invoice->balance, 2) }}</strong></p>
+                        <button type="submit"
+                            class="px-5 py-3 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition-colors">Record Payment</button>
+                    </div>
+                </form>
             </div>
 
         @endif

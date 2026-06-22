@@ -32,6 +32,7 @@ class DashboardController extends Controller
             'invoices_overdue' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'overdue')->count(),
             'invoices_partial' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'partial')->count(),
             'invoices_unpaid' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'unpaid')->count(),
+            'maintenance_requests_total' => MaintenanceRequest::whereIn('unit_id', $unitIds)->count(),
             'monthly_revenue' => Payment::whereIn(
                 'invoice_id',
                 Invoice::whereIn('unit_id', $unitIds)->pluck('id')

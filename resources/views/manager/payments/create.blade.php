@@ -60,6 +60,14 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-secondary mb-1.5">Expected Completion Date</label>
+                <input type="date" name="expected_completion_date" value="{{ old('expected_completion_date') }}"
+                    class="w-full text-sm border border-border rounded-xl px-3 py-2.5 bg-surface focus:outline-none focus:ring-2 focus:ring-brand-400">
+                <p class="text-xs text-muted mt-1">If this is a partial payment, when should the remaining balance be completed?</p>
+                @error('expected_completion_date') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-secondary mb-2">Payment Method <span class="text-danger">*</span></label>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     @foreach(['mpesa' => 'M-Pesa', 'cash' => 'Cash', 'bank_transfer' => 'Bank Transfer', 'cheque' => 'Cheque'] as $val => $label)

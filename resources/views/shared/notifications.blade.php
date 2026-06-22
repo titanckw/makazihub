@@ -16,7 +16,8 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="notificationState()">
+
 
     {{-- Page header --}}
     <div>
@@ -98,7 +99,19 @@
         @else
         <div class="divide-y divide-border">
             @foreach($notifications as $notif)
-            <div class="flex items-start gap-4 px-5 py-4 hover:bg-surface/50 transition-colors">
+            <div class="flex items-start gap-4 px-5 py-4 hover:bg-surface/50 transition-colors cursor-pointer {{ $notif->read_at ? '' : 'bg-surface/60' }}"
+                 data-notif="{{ base64_encode(json_encode([
+                    'id' => $notif->id,
+                    'type' => $notif->type,
+                    'status' => $notif->status,
+                    'channel' => $notif->channel,
+                    'recipient' => $notif->recipient,
+                    'subject' => $notif->subject,
+                    'message' => $notif->message,
+                    'created_at' => $notif->created_at->format('d M Y H:i'),
+                    'read_at' => $notif->read_at ? $notif->read_at->format('d M Y H:i') : null,
+                ])) }}"
+                 @click="openNotification(JSON.parse(atob($event.currentTarget.dataset.notif)), {{ $notif->id }})">
 
                 {{-- Icon --}}
                 <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5
@@ -126,6 +139,11 @@
                         <p class="text-sm font-semibold text-primary">
                             {{ ucfirst(str_replace('_', ' ', $notif->type)) }}
                         </p>
+                        @if(!$notif->read_at)
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-warning-bg text-warning">
+                                Unread
+                            </span>
+                        @endif
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
                             {{ $notif->status === 'failed' ? 'bg-danger-bg text-danger' : 'bg-success-bg text-success' }}">
                             {{ ucfirst($notif->status) }}
@@ -158,5 +176,104 @@
         @endif
     </div>
 
+    <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-auto overflow-hidden" @click.away="open = false">
+            <div class="p-6 border-b border-border">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="text-sm text-muted uppercase tracking-wider">Notification</p>
+                            <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-info-bg text-info" x-show="!selected.read_at">
+                                Unread
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-bold text-primary mt-2" x-text="selected.type ? selected.type.replace(/_/g, ' ') : ''"></h2>
+                        <p class="text-xs text-secondary mt-1" x-text="selected.created_at || ''"></p>
+                    </div>
+                    <button type="button" @click="open = false" class="text-secondary hover:text-primary">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4 text-sm text-secondary">
+                    <div>
+                        <p class="uppercase tracking-wider text-[11px] text-muted">Channel</p>
+                        <p class="mt-1 font-semibold text-primary" x-text="selected.channel ? selected.channel.toUpperCase() : ''"></p>
+                    </div>
+                    <div>
+                        <p class="uppercase tracking-wider text-[11px] text-muted">Status</p>
+                        <p class="mt-1 font-semibold text-primary" x-text="selected.status ? selected.status.toUpperCase() : ''"></p>
+                    </div>
+                </div>
+                <div>
+                    <p class="uppercase tracking-wider text-[11px] text-muted">Recipient</p>
+                    <p class="mt-1 font-mono text-sm text-primary" x-text="selected.recipient || ''"></p>
+                </div>
+                <div>
+                    <p class="uppercase tracking-wider text-[11px] text-muted">Subject</p>
+                    <p class="mt-1 text-sm text-primary" x-text="selected.subject || 'No subject'"></p>
+                </div>
+                <div>
+                    <p class="uppercase tracking-wider text-[11px] text-muted">Message</p>
+                    <p class="mt-1 text-sm text-secondary whitespace-pre-line" x-text="selected.message || ''"></p>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" @click="open = false" class="px-4 py-2 bg-navy-500 text-white rounded-xl hover:bg-navy-400 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function notificationState() {
+            return {
+                open: false,
+                selected: {},
+                notificationReadUrl: '{{ route('notifications.read', ['notification' => 'NOTIFICATION_ID']) }}',
+
+                async markRead(id) {
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                        const url = this.notificationReadUrl.replace('NOTIFICATION_ID', id);
+
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({}),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Mark read failed');
+                        }
+
+                        this.selected.read_at = new Date().toISOString();
+                    } catch (error) {
+                        console.error('Unable to mark notification read', error);
+                    }
+                },
+
+                openNotification(notif, id) {
+                    this.selected = notif;
+                    this.open = true;
+                    this.markRead(id);
+                }
+            };
+        }
+    </script>
 </div>
 @endsection

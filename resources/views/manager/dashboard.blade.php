@@ -76,7 +76,10 @@
             {{-- Maintenance Requests --}}
             <div class="bg-card rounded-2xl border border-border shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-border">
-                    <h3 class="font-display font-700 text-primary">Maintenance</h3>
+                    <div>
+                        <h3 class="font-display font-700 text-primary">Maintenance</h3>
+                        <p class="text-xs text-muted">Total requests: <span class="font-semibold text-primary">{{ number_format($stats['maintenance_requests_total']) }}</span></p>
+                    </div>
                     <a href="{{ route('manager.maintenance.index') }}"
                         class="text-xs text-brand-600 hover:text-brand-500 font-600">View all</a>
                 </div>
