@@ -188,43 +188,4 @@
         </div>
     </div>
 
-    {{-- STK Push Modal --}}
-    <div x-data="{ open: false }" @open-stk.window="open = true" x-show="open" x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @keydown.escape.window="open = false">
-        <div class="bg-white rounded-2xl border border-border w-full max-w-md shadow-2xl" @click.stop>
-            <div class="p-6 border-b border-border">
-                <h3 class="font-bold text-primary">Send M-Pesa STK Push</h3>
-                <p class="text-sm text-muted mt-1">A payment prompt will be sent directly to the tenant's phone.</p>
-            </div>
-            <form action="{{ route('manager.payments.stk-push') }}" method="POST" class="p-6 space-y-4">
-                @csrf
-                <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
-                <div>
-                    <label class="block text-sm font-medium text-secondary mb-1.5">Phone Number <span
-                            class="text-danger">*</span></label>
-                    <input type="text" name="phone_number" value="{{ $invoice->tenant->user->phone ?? '' }}"
-                        placeholder="07XX XXX XXX" required
-                        class="w-full text-sm border border-border rounded-xl px-3 py-2.5 bg-surface focus:outline-none focus:ring-2 focus:ring-brand-400">
-                    <p class="text-xs text-muted mt-1">Safaricom number in 07XX or 254XX format</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-secondary mb-1.5">Amount (KES) <span
-                            class="text-danger">*</span></label>
-                    <input type="number" name="amount" value="{{ $invoice->balance }}" min="1" step="1" required
-                        class="w-full text-sm border border-border rounded-xl px-3 py-2.5 bg-surface focus:outline-none focus:ring-2 focus:ring-brand-400">
-                    <p class="text-xs text-muted mt-1">Outstanding balance: KES {{ number_format($invoice->balance, 2) }}
-                    </p>
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" @click="open = false"
-                        class="text-sm border border-border text-secondary hover:bg-surface px-4 py-2 rounded-xl transition-colors">Cancel</button>
-                    <button type="submit"
-                        class="text-sm bg-success hover:bg-green-700 text-white px-5 py-2 rounded-xl font-semibold transition-colors">
-                        Send STK Push
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
 @endsection

@@ -105,15 +105,14 @@
                         ->get();
 
                     $bellCount = \App\Models\NotificationLog::where('user_id', auth()->id())
-                        ->where('status', 'failed')
-                        ->whereDate('created_at', today())
+                        ->whereNull('read_at')
                         ->count();
 
-                    $bellRoute = match (true) {
-                        auth()->user()->hasRole('superadmin') => route('superadmin.notifications.log'),
-                        auth()->user()->hasRole('manager') => route('manager.notifications.log'),
-                        default => route('tenant.notifications.index'),
-                    };
+                    // Tenant layout always links the bell to the tenant notifications page.
+                    // Route::has() avoids a hard crash if that named route isn't defined yet.
+                    $bellRoute = \Illuminate\Support\Facades\Route::has('tenant.notifications.index')
+                        ? route('tenant.notifications.index')
+                        : '#';
                 @endphp
 
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
@@ -142,8 +141,8 @@
                         <div class="px-4 py-3 border-b border-border flex items-center justify-between">
                             <p class="font-semibold text-primary text-sm">Notifications</p>
                             @if($bellCount > 0)
-                                <span class="px-2 py-0.5 bg-danger-bg text-danger text-xs font-semibold rounded-full">
-                                    {{ $bellCount }} failed
+                                <span class="px-2 py-0.5 bg-warning-bg text-warning text-xs font-semibold rounded-full">
+                                    {{ $bellCount }} unread
                                 </span>
                             @endif
                         </div>
@@ -160,11 +159,12 @@
                         @else
                             <div class="divide-y divide-border max-h-72 overflow-y-auto">
                                 @foreach($bellNotifs as $notif)
-                                    <div class="flex items-start gap-3 px-4 py-3 hover:bg-surface/60 transition-colors">
+                                    <a href="{{ $bellRoute }}?notification_id={{ $notif->id }}"
+                                        class="flex items-start gap-3 px-4 py-3 hover:bg-surface/60 transition-colors group">
                                         {{-- Channel icon --}}
                                         <div
                                             class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5
-                                                                    {{ $notif->status === 'failed' ? 'bg-danger-bg' : ($notif->channel === 'sms' ? 'bg-info-bg' : 'bg-navy-100') }}">
+                                                                            {{ $notif->status === 'failed' ? 'bg-danger-bg' : ($notif->channel === 'sms' ? 'bg-info-bg' : 'bg-navy-100') }}">
                                             @if($notif->status === 'failed')
                                                 <svg class="w-3.5 h-3.5 text-danger" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -190,15 +190,21 @@
                                                 {{ ucfirst(str_replace('_', ' ', $notif->type)) }}
                                                 <span
                                                     class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold
-                                                                            {{ $notif->status === 'failed' ? 'bg-danger-bg text-danger' : 'bg-success-bg text-success' }}">
+                                                                                    {{ $notif->status === 'failed' ? 'bg-danger-bg text-danger' : 'bg-success-bg text-success' }}">
                                                     {{ ucfirst($notif->status) }}
                                                 </span>
+                                                @if(!$notif->read_at)
+                                                    <span
+                                                        class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-warning-bg text-warning">
+                                                        Unread
+                                                    </span>
+                                                @endif
                                             </p>
                                             <p class="text-xs text-muted mt-0.5 truncate">{{ $notif->recipient }}</p>
                                             <p class="text-[10px] text-muted mt-0.5">{{ $notif->created_at->diffForHumans() }}
                                             </p>
                                         </div>
-                                    </div>
+                                    </a>
                                 @endforeach
                             </div>
 

@@ -168,12 +168,6 @@
                                    class="text-xs bg-navy-500 hover:bg-navy-400 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
                                     View
                                 </a>
-                                @if($invoice->status !== 'paid')
-                                <a href="{{ route('manager.payments.create', ['invoice_id' => $invoice->id]) }}"
-                                   class="text-xs bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
-                                    + Pay
-                                </a>
-                                @endif
                             </div>
                         </td>
                     </tr>
