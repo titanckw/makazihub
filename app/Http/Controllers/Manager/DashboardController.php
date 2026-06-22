@@ -7,6 +7,8 @@ use App\Models\Property;
 use App\Models\Unit;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Tenant;
+use App\Models\MaintenanceRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -17,24 +19,26 @@ class DashboardController extends Controller
 
         // Only show properties belonging to this manager
         $propertyIds = Property::where('manager_id', $managerId)->pluck('id');
-        $unitIds     = Unit::whereIn('property_id', $propertyIds)->pluck('id');
+        $unitIds = Unit::whereIn('property_id', $propertyIds)->pluck('id');
 
         $stats = [
-            'total_properties'  => $propertyIds->count(),
-            'total_units'       => $unitIds->count(),
-            'occupied_units'    => Unit::whereIn('id', $unitIds)->where('status', 'occupied')->count(),
-            'vacant_units'      => Unit::whereIn('id', $unitIds)->where('status', 'vacant')->count(),
+            'total_properties' => $propertyIds->count(),
+            'total_units' => $unitIds->count(),
+            'total_tenants' => Tenant::whereIn('unit_id', $unitIds)->count(),
+            'occupied_units' => Unit::whereIn('id', $unitIds)->where('status', 'occupied')->count(),
+            'vacant_units' => Unit::whereIn('id', $unitIds)->where('status', 'vacant')->count(),
             'maintenance_units' => Unit::whereIn('id', $unitIds)->where('status', 'maintenance')->count(),
-            'invoices_paid'     => Invoice::whereIn('unit_id', $unitIds)->where('status', 'paid')->count(),
-            'invoices_overdue'  => Invoice::whereIn('unit_id', $unitIds)->where('status', 'overdue')->count(),
-            'invoices_partial'  => Invoice::whereIn('unit_id', $unitIds)->where('status', 'partial')->count(),
-            'invoices_unpaid'   => Invoice::whereIn('unit_id', $unitIds)->where('status', 'unpaid')->count(),
-            'monthly_revenue'   => Payment::whereIn('invoice_id',
-                                        Invoice::whereIn('unit_id', $unitIds)->pluck('id')
-                                    )->where('status', 'confirmed')
-                                    ->whereMonth('payment_date', now()->month)
-                                    ->whereYear('payment_date', now()->year)
-                                    ->sum('amount'),
+            'invoices_paid' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'paid')->count(),
+            'invoices_overdue' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'overdue')->count(),
+            'invoices_partial' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'partial')->count(),
+            'invoices_unpaid' => Invoice::whereIn('unit_id', $unitIds)->where('status', 'unpaid')->count(),
+            'monthly_revenue' => Payment::whereIn(
+                'invoice_id',
+                Invoice::whereIn('unit_id', $unitIds)->pluck('id')
+            )->where('status', 'confirmed')
+                ->whereMonth('payment_date', now()->month)
+                ->whereYear('payment_date', now()->year)
+                ->sum('amount'),
         ];
 
         $overdueInvoices = Invoice::with(['tenant.user', 'unit.property'])
@@ -51,10 +55,20 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
+        $maintenanceRequests = MaintenanceRequest::whereIn('unit_id', $unitIds)
+            ->with(['tenant.user', 'unit'])
+            ->where(function($query) {
+                $query->where('status', 'under_review')
+                      ->orWhere('status', 'pending_repairs');
+            })
+            ->latest()
+            ->take(5)
+            ->get();
+
         $properties = Property::where('manager_id', $managerId)
             ->withCount(['units', 'units as occupied_count' => fn($q) => $q->where('status', 'occupied')])
             ->get();
 
-        return view('manager.dashboard', compact('stats', 'overdueInvoices', 'recentPayments', 'properties'));
+        return view('manager.dashboard', compact('stats', 'overdueInvoices', 'recentPayments', 'maintenanceRequests', 'properties'));
     }
 }

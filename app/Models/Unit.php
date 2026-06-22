@@ -36,6 +36,11 @@ class Unit extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function maintenanceRequests()
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
+
     // Status badge color helper
     public function getStatusColorAttribute(): string
     {

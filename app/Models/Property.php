@@ -24,4 +24,9 @@ class Property extends Model
     {
         return $this->hasMany(Unit::class);
     }
+
+    public function maintenanceRequests()
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
 }

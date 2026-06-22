@@ -10,6 +10,7 @@ use App\Http\Controllers\Manager\InvoiceController;
 use App\Http\Controllers\Manager\PaymentController;
 use App\Http\Controllers\Manager\ReceiptController;
 use App\Http\Controllers\Manager\NotificationController;
+use App\Http\Controllers\Manager\MaintenanceController;
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -47,6 +48,11 @@ Route::get('receipts/{receipt}/download', [ReceiptController::class, 'download']
 Route::post('receipts/{receipt}/send', [ReceiptController::class, 'send'])->name('receipts.send');
 
 // Notifications
+
+// Maintenance Requests
+Route::get('maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
+Route::get('maintenance/{maintenance}', [MaintenanceController::class, 'show'])->name('maintenance.show');
+Route::patch('maintenance/{maintenance}/update-status', [MaintenanceController::class, 'updateStatus'])->name('maintenance.update-status');
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
 Route::post('notifications/send-custom', [NotificationController::class, 'sendCustom'])->name('notifications.send-custom');
 Route::post('notifications/send-all-overdue', [NotificationController::class, 'sendAllOverdue'])->name('notifications.send-all-overdue');

@@ -16,23 +16,25 @@
             <div class="absolute -right-8 -top-8 w-40 h-40 bg-brand-600 rounded-full opacity-20 blur-2xl"></div>
             <div class="relative z-10">
                 <p class="text-white/60 text-sm mb-1">Good
-                    {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }},</p>
+                    {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }},
+                </p>
                 <h2 class="font-display text-white text-2xl font-700">{{ auth()->user()->first_name }} 👋</h2>
                 <p class="text-white/50 text-sm mt-1">{{ now()->format('l, d F Y') }}</p>
             </div>
             <div class="relative z-10 text-right hidden sm:block">
                 <p class="text-white/50 text-xs mb-1">This Month's Revenue</p>
                 <p class="font-display text-brand-400 text-3xl font-700">KES
-                    {{ number_format($stats['monthly_revenue'], 0) }}</p>
+                    {{ number_format($stats['monthly_revenue'], 0) }}
+                </p>
             </div>
         </div>
 
         {{-- KPI Cards --}}
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
             <x-stat-card label="Total Units" :value="number_format($stats['total_units'])" color="navy" :icon="'<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\'/></svg>'" />
+            <x-stat-card label="Total Tenants" :value="number_format($stats['total_tenants'])" color="brand" :icon="'<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM15 20H9m6 0h4v-2a4 4 0 00-8 0v2zM1 20h5v-2a4 4 0 015.773-3.694M13 10a4 4 0 11-8 0 4 4 0 018 0z\'/></svg>'" />
             <x-stat-card label="Occupied" :value="number_format($stats['occupied_units'])" color="emerald" :icon="'<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\'/></svg>'" />
             <x-stat-card label="Vacant" :value="number_format($stats['vacant_units'])" color="blue" :icon="'<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z\'/></svg>'" />
-            <x-stat-card label="Maintenance" :value="number_format($stats['maintenance_units'])" color="amber" :icon="'<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z\'/><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M15 12a3 3 0 11-6 0 3 3 0 016 0z\'/></svg>'" />
         </div>
 
         {{-- Invoice Status --}}
@@ -71,27 +73,25 @@
                 </div>
             </div>
 
-            {{-- Overdue Invoices --}}
+            {{-- Maintenance Requests --}}
             <div class="bg-card rounded-2xl border border-border shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-border">
-                    <h3 class="font-display font-700 text-primary">Overdue</h3>
-                    @if($stats['invoices_overdue'] > 0)
-                        <span
-                            class="text-xs bg-danger-bg text-danger px-2 py-1 rounded-lg font-600">{{ $stats['invoices_overdue'] }}</span>
-                    @endif
+                    <h3 class="font-display font-700 text-primary">Maintenance</h3>
+                    <a href="{{ route('manager.maintenance.index') }}"
+                        class="text-xs text-brand-600 hover:text-brand-500 font-600">View all</a>
                 </div>
                 <div class="divide-y divide-border">
-                    @forelse($overdueInvoices as $invoice)
-                        <div class="px-6 py-3 flex items-center justify-between">
+                    @forelse($maintenanceRequests as $request)
+                        <a href="{{ route('manager.maintenance.show', $request) }}"
+                            class="px-6 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
                             <div>
-                                <p class="text-sm font-600 text-primary">{{ $invoice->tenant->user->name ?? 'Unknown' }}</p>
-                                <p class="text-xs text-muted">{{ $invoice->unit?->unit_number ?? 'N/A' }} · Due
-                                    {{ $invoice->due_date?->format('d M') ?? 'N/A' }}</p>
+                                <p class="text-sm font-600 text-primary">{{ $request->tenant->user->name ?? 'Unknown' }}</p>
+                                <p class="text-xs text-muted">{{ $request->repair_type }} · {{ $request->unit->unit_number ?? 'N/A' }}</p>
                             </div>
-                            <p class="text-sm font-700 text-danger">KES {{ number_format(is_array($invoice->balance) ? 0 : ($invoice->balance ?? 0), 0) }}</p>
-                        </div>
+                            <span class="text-xs font-600 px-2 py-1 rounded {{ $request->status_badge }}">{{ $request->status_label }}</span>
+                        </a>
                     @empty
-                        <div class="px-6 py-8 text-center text-muted text-sm">🎉 All clear!</div>
+                        <div class="px-6 py-8 text-center text-muted text-sm">No maintenance requests.</div>
                     @endforelse
                 </div>
             </div>
@@ -118,6 +118,33 @@
                 </div>
             </div>
 
+        </div>
+
+        {{-- Overdue Invoices --}}
+        <div class="bg-card rounded-2xl border border-border shadow-sm">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+                <h3 class="font-display font-700 text-primary">Overdue</h3>
+                @if($stats['invoices_overdue'] > 0)
+                    <span
+                        class="text-xs bg-danger-bg text-danger px-2 py-1 rounded-lg font-600">{{ $stats['invoices_overdue'] }}</span>
+                @endif
+            </div>
+            <div class="divide-y divide-border">
+                @forelse($overdueInvoices as $invoice)
+                    <div class="px-6 py-3 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-600 text-primary">{{ $invoice->tenant->user->name ?? 'Unknown' }}</p>
+                            <p class="text-xs text-muted">{{ $invoice->unit?->unit_number ?? 'N/A' }} · Due
+                                {{ $invoice->due_date?->format('d M') ?? 'N/A' }}
+                            </p>
+                        </div>
+                        <p class="text-sm font-700 text-danger">KES
+                            {{ number_format(is_array($invoice->balance) ? 0 : ($invoice->balance ?? 0), 0) }}</p>
+                    </div>
+                @empty
+                    <div class="px-6 py-8 text-center text-muted text-sm">🎉 All clear!</div>
+                @endforelse
+            </div>
         </div>
     </div>
 @endsection

@@ -48,6 +48,11 @@ class Tenant extends Model
         return $this->hasOne(Lease::class)->where('status', 'active')->latestOfMany();
     }
 
+    public function maintenanceRequests(): HasMany
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
+
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {

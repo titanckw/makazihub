@@ -7,6 +7,7 @@ use App\Http\Controllers\Tenant\LeaseController;
 use App\Http\Controllers\Tenant\PaymentController;
 use App\Http\Controllers\Tenant\ReceiptController;
 use App\Http\Controllers\Tenant\ProfileController;
+use App\Http\Controllers\Tenant\MaintenanceController;
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -33,4 +34,10 @@ Route::patch('profile/password', [ProfileController::class, 'updatePassword'])->
 
 Route::post('invoices/{invoice}/stk-push', [InvoiceController::class, 'stkPush'])->name('payments.stk-push');
 
+
+// Maintenance Requests
+Route::get('maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
+Route::get('maintenance/create', [MaintenanceController::class, 'create'])->name('maintenance.create');
+Route::post('maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
+Route::get('maintenance/{maintenance}', [MaintenanceController::class, 'show'])->name('maintenance.show');
 Route::get('notifications', [\App\Http\Controllers\NotificationsController::class, 'index'])->name('notifications.index');
