@@ -8,6 +8,8 @@ use App\Http\Controllers\Tenant\PaymentController;
 use App\Http\Controllers\Tenant\ReceiptController;
 use App\Http\Controllers\Tenant\ProfileController;
 use App\Http\Controllers\Tenant\MaintenanceController;
+use App\Http\Controllers\Tenant\MarketplaceController as TenantMarketplaceController;
+
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -42,3 +44,9 @@ Route::get('maintenance/create', [MaintenanceController::class, 'create'])->name
 Route::post('maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
 Route::get('maintenance/{maintenance}', [MaintenanceController::class, 'show'])->name('maintenance.show');
 Route::get('notifications', [\App\Http\Controllers\NotificationsController::class, 'index'])->name('notifications.index');
+
+// Marketplace
+Route::get('marketplace', [TenantMarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('marketplace/my-bookings', [TenantMarketplaceController::class, 'myBookings'])->name('marketplace.my-bookings');
+Route::get('marketplace/{service}', [TenantMarketplaceController::class, 'show'])->name('marketplace.show');
+Route::post('marketplace/{service}/book', [TenantMarketplaceController::class, 'book'])->name('marketplace.book');

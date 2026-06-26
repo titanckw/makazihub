@@ -13,22 +13,22 @@ class NotificationsController extends Controller
     {
         $query = NotificationLog::where('user_id', auth()->id())
             ->when($request->channel, fn($q, $v) => $q->where('channel', $v))
-            ->when($request->status,  fn($q, $v) => $q->where('status', $v))
-            ->when($request->type,    fn($q, $v) => $q->where('type', $v))
+            ->when($request->status, fn($q, $v) => $q->where('status', $v))
+            ->when($request->type, fn($q, $v) => $q->where('type', $v))
             ->latest();
 
         $notifications = $query->paginate(15)->withQueryString();
 
-        $totalSent   = NotificationLog::where('user_id', auth()->id())->where('status', 'sent')->count();
+        $totalSent = NotificationLog::where('user_id', auth()->id())->where('status', 'sent')->count();
         $totalFailed = NotificationLog::where('user_id', auth()->id())->where('status', 'failed')->count();
-        $smsSent     = NotificationLog::where('user_id', auth()->id())->where('channel', 'sms')->where('status', 'sent')->count();
-        $emailSent   = NotificationLog::where('user_id', auth()->id())->where('channel', 'email')->where('status', 'sent')->count();
+        $smsSent = NotificationLog::where('user_id', auth()->id())->where('channel', 'sms')->where('status', 'sent')->count();
+        $emailSent = NotificationLog::where('user_id', auth()->id())->where('channel', 'email')->where('status', 'sent')->count();
 
         // Determine which layout to use based on role
-        $layout = match(true) {
+        $layout = match (true) {
             auth()->user()->hasRole('superadmin') => 'layouts.app',
-            auth()->user()->hasRole('manager')    => 'layouts.app',
-            default                               => 'layouts.tenant',
+            auth()->user()->hasRole('manager') => 'layouts.app',
+            default => 'layouts.tenant',
         };
 
         return view('shared.notifications', compact(

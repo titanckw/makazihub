@@ -11,7 +11,7 @@ use App\Http\Controllers\Manager\PaymentController;
 use App\Http\Controllers\Manager\ReceiptController;
 use App\Http\Controllers\Manager\NotificationController;
 use App\Http\Controllers\Manager\MaintenanceController;
-
+use App\Http\Controllers\Manager\MarketplaceController as ManagerMarketplaceController;
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -59,3 +59,15 @@ Route::post('notifications/send-all-overdue', [NotificationController::class, 's
 Route::post('notifications/invoice/{invoice}/send', [NotificationController::class, 'sendInvoice'])->name('notifications.send-invoice');
 Route::post('notifications/invoice/{invoice}/send-overdue', [NotificationController::class, 'sendOverdue'])->name('notifications.send-overdue');
 Route::get('notifications-log', [\App\Http\Controllers\NotificationsController::class, 'index'])->name('notifications.log');
+
+// Marketplace management
+Route::get('marketplace', [ManagerMarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('marketplace/create', [ManagerMarketplaceController::class, 'create'])->name('marketplace.create');
+Route::post('marketplace', [ManagerMarketplaceController::class, 'store'])->name('marketplace.store');
+Route::get('marketplace/{marketplace}/edit', [ManagerMarketplaceController::class, 'edit'])->name('marketplace.edit');
+Route::put('marketplace/{marketplace}', [ManagerMarketplaceController::class, 'update'])->name('marketplace.update');
+Route::delete('marketplace/{marketplace}', [ManagerMarketplaceController::class, 'destroy'])->name('marketplace.destroy');
+
+// Bookings
+Route::get('marketplace-bookings', [ManagerMarketplaceController::class, 'bookings'])->name('marketplace.bookings');
+Route::patch('marketplace-bookings/{booking}', [ManagerMarketplaceController::class, 'updateBooking'])->name('marketplace.bookings.update');
