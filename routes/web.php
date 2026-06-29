@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SettingsController;
 
 // -------------------------------------------------------
 // PUBLIC ROUTES
@@ -43,3 +44,9 @@ Route::post('/mpesa/callback', [\App\Http\Controllers\Manager\PaymentController:
 
 Route::middleware(['auth'])->post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationsController::class, 'markAsRead'])
     ->name('notifications.read');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::patch('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+});
