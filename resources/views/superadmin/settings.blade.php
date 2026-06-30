@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Manage your account preferences')
 
 @section('sidebar-nav')
-    @include('manager.partials.sidebar')
+    @include('superadmin.partials.sidebar')
 @endsection
 
 @section('content')

@@ -126,6 +126,12 @@
         </span>
     </div>
 
+    @if($receipt->invoice?->tax_note)
+    <hr class="divider">
+    <div class="section-label">Tax Compliance — {{ $receipt->invoice->tax_type_label }}</div>
+    <div style="font-size:10px; color:#475569; line-height:1.5;">{{ $receipt->invoice->tax_note }}</div>
+    @endif
+
     <hr class="divider-solid">
 
     {{-- Footer --}}

@@ -31,6 +31,7 @@ class Invoice extends Model
         'notes',
         'expected_completion_date',
         'generated_by', // manual | auto
+        'tax_type', 'tax_rate', 'tax_amount', 'vat_amount', 'net_to_landlord', 'tax_note',
     ];
 
     protected $casts = [
@@ -42,7 +43,24 @@ class Invoice extends Model
         'late_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'amount_paid' => 'decimal:2',
+        'tax_rate' => 'decimal:4',
+        'tax_amount' => 'decimal:2',
+        'vat_amount' => 'decimal:2',
+        'net_to_landlord' => 'decimal:2',
     ];
+
+    /**
+     * Human-readable label for the tax regime applied to this invoice.
+     */
+    public function getTaxTypeLabelAttribute(): string
+    {
+        return match ($this->tax_type) {
+            'RRI' => 'Residential Rental Income Tax (MRI)',
+            'COMMERCIAL' => 'Commercial Rental Income',
+            'NON_RESIDENT_WHT' => 'Non-Resident Withholding Tax',
+            default => '—',
+        };
+    }
 
     // ── Relationships ──────────────────────────────────────────────
 

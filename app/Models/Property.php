@@ -9,11 +9,23 @@ class Property extends Model
     protected $fillable = [
         'manager_id', 'name', 'address', 'city', 'county',
         'property_type', 'total_units', 'description', 'is_active',
+        'landlord_tax_status', 'is_vat_registered', 'landlord_pin',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_vat_registered' => 'boolean',
     ];
+
+    public function isCommercial(): bool
+    {
+        return $this->property_type === 'commercial';
+    }
+
+    public function isNonResidentLandlord(): bool
+    {
+        return $this->landlord_tax_status === 'non_resident';
+    }
 
     public function manager()
     {

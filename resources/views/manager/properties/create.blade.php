@@ -81,6 +81,36 @@
                     class="w-full px-4 py-2.5 rounded-xl border border-border bg-white text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all resize-none">{{ old('description') }}</textarea>
             </div>
 
+            {{-- Tax Classification (Kenya) --}}
+            <div class="border-t border-border pt-5">
+                <h4 class="text-sm font-700 text-primary mb-1">Tax Classification</h4>
+                <p class="text-xs text-muted mb-3">Used to compute Kenyan rental income tax (RRI / Commercial / Non-Resident WHT) on invoices for this property.</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-600 text-primary mb-1.5">Landlord Residency <span class="text-danger">*</span></label>
+                        <select name="landlord_tax_status" required
+                            class="w-full px-4 py-2.5 rounded-xl border @error('landlord_tax_status') border-danger @else border-border @enderror bg-white text-primary focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                            <option value="resident" {{ old('landlord_tax_status', 'resident') == 'resident' ? 'selected' : '' }}>Resident</option>
+                            <option value="non_resident" {{ old('landlord_tax_status') == 'non_resident' ? 'selected' : '' }}>Non-Resident</option>
+                        </select>
+                        @error('landlord_tax_status') <p class="text-danger text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-600 text-primary mb-1.5">Landlord KRA PIN</label>
+                        <input type="text" name="landlord_pin" value="{{ old('landlord_pin') }}"
+                            placeholder="e.g. A001234567Z"
+                            class="w-full px-4 py-2.5 rounded-xl border border-border bg-white text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2 mt-3 text-sm text-primary">
+                    <input type="checkbox" name="is_vat_registered" value="1" {{ old('is_vat_registered') ? 'checked' : '' }}
+                        class="rounded border-border text-brand-600 focus:ring-brand-500">
+                    Landlord is VAT-registered for this property (adds 16% VAT to commercial rent invoices)
+                </label>
+            </div>
+
             {{-- Actions --}}
             <div class="flex items-center gap-3 pt-2">
                 <button type="submit"

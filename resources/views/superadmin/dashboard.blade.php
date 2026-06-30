@@ -5,7 +5,7 @@
 @section('page-subtitle', 'System-wide overview')
 
 @section('sidebar-nav')
-    @include('manager.partials.sidebar')
+    @include('superadmin.partials.sidebar')
 @endsection
 
 @section('content')

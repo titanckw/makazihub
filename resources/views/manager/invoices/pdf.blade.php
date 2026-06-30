@@ -108,10 +108,26 @@
             <tr>
                 <td>Monthly Rent — Unit {{ $invoice->unit->unit_number ?? '—' }}</td>
                 <td>{{ $invoice->period_start->format('d M Y') }} – {{ $invoice->period_end->format('d M Y') }}</td>
-                <td style="text-align: right; font-weight: 600">{{ number_format($invoice->amount, 2) }}</td>
+                <td style="text-align: right; font-weight: 600">{{ number_format($invoice->amount_due, 2) }}</td>
             </tr>
+            @if($invoice->vat_amount > 0)
+            <tr>
+                <td>VAT (16%) on Commercial Rent</td>
+                <td>—</td>
+                <td style="text-align: right; font-weight: 600">{{ number_format($invoice->vat_amount, 2) }}</td>
+            </tr>
+            @endif
         </tbody>
     </table>
+
+    @if($invoice->tax_note)
+    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:12px 14px; margin-bottom:20px;">
+        <div style="font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:#94A3B8; margin-bottom:4px;">
+            Tax Compliance — {{ $invoice->tax_type_label }}
+        </div>
+        <div style="font-size:10px; color:#475569; line-height:1.5;">{{ $invoice->tax_note }}</div>
+    </div>
+    @endif
 
     {{-- Totals --}}
     <div class="totals">

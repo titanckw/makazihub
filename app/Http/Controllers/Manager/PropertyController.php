@@ -39,7 +39,12 @@ class PropertyController extends Controller
             'county'        => 'required|string|max:100',
             'property_type' => 'required|in:apartment,maisonette,commercial,bedsitter,townhouse',
             'description'   => 'nullable|string',
+            'landlord_tax_status' => 'required|in:resident,non_resident',
+            'is_vat_registered'   => 'nullable|boolean',
+            'landlord_pin'        => 'nullable|string|max:20',
         ]);
+
+        $validated['is_vat_registered'] = $request->boolean('is_vat_registered');
 
         $validated['manager_id'] = Auth::id();
         $validated['is_active']  = true;
@@ -89,7 +94,12 @@ class PropertyController extends Controller
             'property_type' => 'required|in:apartment,maisonette,commercial,bedsitter,townhouse',
             'description'   => 'nullable|string',
             'is_active'     => 'boolean',
+            'landlord_tax_status' => 'required|in:resident,non_resident',
+            'is_vat_registered'   => 'nullable|boolean',
+            'landlord_pin'        => 'nullable|string|max:20',
         ]);
+
+        $validated['is_vat_registered'] = $request->boolean('is_vat_registered');
 
         $property->update($validated);
 

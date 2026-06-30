@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceService
 {
+    public function __construct(private KenyaRentalTaxService $taxService = new KenyaRentalTaxService())
+    {
+    }
+
     /**
      * Generate a single invoice for a lease for the current (or specified) month.
      */
@@ -34,7 +38,21 @@ class InvoiceService
         }
 
         return DB::transaction(function () use ($lease, $periodStart, $periodEnd, $dueDate, $forDate) {
-            $rent = $lease->rent_amount;
+            $rent = (float) $lease->rent_amount;
+            $property = $lease->property;
+
+            $tax = $property
+                ? $this->taxService->calculate($property, $rent)
+                : [
+                    'tax_type' => null, 'tax_rate' => null, 'tax_amount' => 0,
+                    'vat_amount' => 0, 'net_to_landlord' => $rent, 'tax_note' => null,
+                ];
+
+            // VAT (commercial, VAT-registered landlords only) is added on top of rent
+            // and forms part of what the tenant owes. Income tax (RRI / non-resident WHT)
+            // is the landlord's obligation and does NOT change the tenant's amount due.
+            $vat = $tax['vat_amount'] ?? 0;
+            $totalAmount = $rent + $vat;
 
             return Invoice::create([
                 'lease_id' => $lease->id,
@@ -44,7 +62,7 @@ class InvoiceService
                 'invoice_number' => Invoice::generateNumber(),
                 'amount_due' => $rent,
                 'late_fee' => 0,
-                'total_amount' => $rent, // currently same as amount_due
+                'total_amount' => $totalAmount,
                 'amount_paid' => 0,
                 'due_date' => $dueDate,
                 'period_start' => $periodStart,
@@ -53,6 +71,12 @@ class InvoiceService
                 'billing_period' => $periodStart->format('Y-m'),
                 'status' => 'unpaid',
                 'generated_by' => 'manual',
+                'tax_type' => $tax['tax_type'],
+                'tax_rate' => $tax['tax_rate'],
+                'tax_amount' => $tax['tax_amount'],
+                'vat_amount' => $vat,
+                'net_to_landlord' => $tax['net_to_landlord'],
+                'tax_note' => $tax['tax_note'],
             ]);
         });
     }
