@@ -149,5 +149,51 @@
                 @endforelse
             </div>
         </div>
+
+        {{-- Staff Management Summary --}}
+        <div class="bg-card rounded-2xl border border-border shadow-sm">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+                <h3 class="font-display font-700 text-primary">Staff Management</h3>
+                <a href="{{ route('manager.staff.index') }}" class="text-xs text-brand-600 hover:text-brand-500 font-600">Manage staff</a>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 px-6 py-5">
+                <a href="{{ route('manager.staff.index') }}" class="block">
+                    <p class="text-xs text-muted">Active Staff</p>
+                    <p class="text-2xl font-700 text-primary mt-1">{{ $staffStats['total_staff'] }}</p>
+                </a>
+                <a href="{{ route('manager.attendance.index') }}" class="block">
+                    <p class="text-xs text-muted">Present Today</p>
+                    <p class="text-2xl font-700 text-success mt-1">{{ $staffStats['present_today'] }}</p>
+                </a>
+                <a href="{{ route('manager.leave.index') }}" class="block">
+                    <p class="text-xs text-muted">Pending Leave</p>
+                    <p class="text-2xl font-700 {{ $staffStats['pending_leave'] > 0 ? 'text-warning' : 'text-primary' }} mt-1">{{ $staffStats['pending_leave'] }}</p>
+                </a>
+                <a href="{{ route('manager.documents.index') }}" class="block">
+                    <p class="text-xs text-muted">Documents Stored</p>
+                    <p class="text-2xl font-700 text-primary mt-1">{{ $staffStats['total_documents'] }}</p>
+                </a>
+                <a href="{{ route('manager.chat.index') }}" class="block">
+                    <p class="text-xs text-muted">Unread Messages</p>
+                    <p class="text-2xl font-700 {{ $staffStats['unread_messages'] > 0 ? 'text-danger' : 'text-primary' }} mt-1">{{ $staffStats['unread_messages'] }}</p>
+                </a>
+            </div>
+
+            @if($pendingLeaveRequests->isNotEmpty())
+                <div class="border-t border-border divide-y divide-border">
+                    <p class="px-6 pt-4 pb-1 text-xs font-semibold text-secondary uppercase tracking-wider">Pending Leave Requests</p>
+                    @foreach($pendingLeaveRequests as $leave)
+                        <a href="{{ route('manager.leave.index') }}" class="px-6 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                            <div>
+                                <p class="text-sm font-600 text-primary">{{ $leave->staff->user->name }}</p>
+                                <p class="text-xs text-muted">{{ $leave->type_label }} · {{ $leave->start_date->format('M d') }} – {{ $leave->end_date->format('M d, Y') }}</p>
+                            </div>
+                            <span class="text-xs font-600 px-2 py-1 rounded {{ $leave->status_badge }}">{{ ucfirst($leave->status) }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
     </div>
 @endsection

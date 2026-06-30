@@ -35,7 +35,34 @@ class NotificationLog extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // ── Scopes ─────────────────────────────────────────────────────
+    // ── Helpers ────────────────────────────────────────────────────
+
+    /**
+     * Create an in-app ("system") notification for a user.
+     */
+    public static function notify(int $userId, string $type, string $subject, string $message): self
+    {
+        return self::create([
+            'user_id' => $userId,
+            'type'    => $type,
+            'channel' => 'system',
+            'recipient' => 'in-app',
+            'subject' => $subject,
+            'message' => $message,
+            'status'  => 'sent',
+            'sent_at' => now(),
+        ]);
+    }
+
+    public function scopeSystem($query)
+    {
+        return $query->where('channel', 'system');
+    }
+
+    public function scopeUnread($query)
+    {
+        return $query->whereNull('read_at');
+    }
 
     public function scopeSms($query)
     {

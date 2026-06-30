@@ -28,6 +28,7 @@ class NotificationsController extends Controller
         $layout = match (true) {
             auth()->user()->hasRole('superadmin') => 'layouts.app',
             auth()->user()->hasRole('manager') => 'layouts.app',
+            auth()->user()->hasRole('staff') => 'layouts.app',
             default => 'layouts.tenant',
         };
 
@@ -50,5 +51,19 @@ class NotificationsController extends Controller
         }
 
         return response()->json(['success' => true, 'read_at' => $notification->read_at]);
+    }
+
+    /**
+     * Polled every few seconds by the bell dropdown to give a near
+     * real-time unread count + latest items without a websocket server.
+     */
+    public function poll(Request $request)
+    {
+        $unreadCount = NotificationLog::where('user_id', auth()->id())->whereNull('read_at')->count();
+        $latest = NotificationLog::where('user_id', auth()->id())->latest()->take(6)->get(
+            ['id', 'type', 'channel', 'subject', 'message', 'status', 'read_at', 'created_at']
+        );
+
+        return response()->json(['unread_count' => $unreadCount, 'notifications' => $latest]);
     }
 }

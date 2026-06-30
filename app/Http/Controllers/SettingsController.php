@@ -20,6 +20,7 @@ class SettingsController extends Controller
         $view = match (true) {
             $user->hasRole('superadmin') => 'superadmin.settings',
             $user->hasRole('manager')    => 'manager.settings',
+            $user->hasRole('staff')      => 'staff.settings',
             default                      => 'tenant.settings',
         };
 

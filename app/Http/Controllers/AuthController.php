@@ -58,6 +58,8 @@ class AuthController extends Controller
             return redirect()->route('manager.dashboard');
         } elseif ($user->hasRole('tenant')) {
             return redirect()->route('tenant.dashboard');
+        } elseif ($user->hasRole('staff')) {
+            return redirect()->route('staff.dashboard');
         }
 
         Auth::logout();

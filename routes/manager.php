@@ -12,6 +12,9 @@ use App\Http\Controllers\Manager\ReceiptController;
 use App\Http\Controllers\Manager\NotificationController;
 use App\Http\Controllers\Manager\MaintenanceController;
 use App\Http\Controllers\Manager\MarketplaceController as ManagerMarketplaceController;
+use App\Http\Controllers\Manager\BulkUploadController;
+use App\Http\Controllers\Manager\StaffController;
+
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -71,3 +74,39 @@ Route::delete('marketplace/{marketplace}', [ManagerMarketplaceController::class,
 // Bookings
 Route::get('marketplace-bookings', [ManagerMarketplaceController::class, 'bookings'])->name('marketplace.bookings');
 Route::patch('marketplace-bookings/{booking}', [ManagerMarketplaceController::class, 'updateBooking'])->name('marketplace.bookings.update');
+
+Route::prefix('bulk-upload')->name('bulk-upload.')->group(function () {
+
+    // Landing page
+    Route::get('/', [BulkUploadController::class, 'index'])->name('index');
+
+    // Tenants
+    Route::get('tenants', [BulkUploadController::class, 'tenantsForm'])->name('tenants');
+    Route::get('tenants/template', [BulkUploadController::class, 'downloadTenantTemplate'])->name('tenants.template');
+    Route::post('tenants/import', [BulkUploadController::class, 'importTenants'])->name('tenants.import');
+
+    // Properties
+    Route::get('properties', [BulkUploadController::class, 'propertiesForm'])->name('properties');
+    Route::get('properties/template', [BulkUploadController::class, 'downloadPropertyTemplate'])->name('properties.template');
+    Route::post('properties/import', [BulkUploadController::class, 'importProperties'])->name('properties.import');
+});
+
+Route::resource('staff', StaffController::class);
+
+// Attendance
+Route::get('attendance', [\App\Http\Controllers\Manager\AttendanceController::class, 'index'])->name('attendance.index');
+
+// Leave Management
+Route::get('leave', [\App\Http\Controllers\Manager\LeaveController::class, 'index'])->name('leave.index');
+Route::patch('leave/{leave}/review', [\App\Http\Controllers\Manager\LeaveController::class, 'review'])->name('leave.review');
+
+// Document Storage
+Route::get('documents', [\App\Http\Controllers\Manager\DocumentController::class, 'index'])->name('documents.index');
+Route::post('documents', [\App\Http\Controllers\Manager\DocumentController::class, 'store'])->name('documents.store');
+Route::get('documents/{document}/download', [\App\Http\Controllers\Manager\DocumentController::class, 'download'])->name('documents.download');
+Route::delete('documents/{document}', [\App\Http\Controllers\Manager\DocumentController::class, 'destroy'])->name('documents.destroy');
+
+// Chat
+Route::get('chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
+Route::post('chat', [\App\Http\Controllers\ChatController::class, 'store'])->name('chat.store');
+Route::get('chat/poll', [\App\Http\Controllers\ChatController::class, 'poll'])->name('chat.poll');

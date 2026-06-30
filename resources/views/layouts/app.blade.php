@@ -110,20 +110,40 @@
                         $bellRoute = match (true) {
                             auth()->user()->hasRole('superadmin') => route('superadmin.notifications.log'),
                             auth()->user()->hasRole('manager') => route('manager.notifications.log'),
+                            auth()->user()->hasRole('staff') => route('staff.notifications.index'),
                             default => route('tenant.notifications.index'),
                         };
                     @endphp
 
-                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <div class="relative" x-data="{
+                            open: false,
+                            count: {{ $bellCount }},
+                            items: {{ $bellNotifs->map(fn($n) => [
+                                'id' => $n->id, 'type' => $n->type, 'channel' => $n->channel,
+                                'status' => $n->status, 'recipient' => $n->recipient,
+                                'read_at' => $n->read_at, 'created_at' => $n->created_at->diffForHumans(),
+                            ])->toJson() }},
+                            poll() {
+                                fetch('{{ route('notifications.poll') }}')
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        this.count = data.unread_count;
+                                        this.items = data.notifications.map(n => ({
+                                            id: n.id, type: n.type, channel: n.channel, status: n.status,
+                                            recipient: n.recipient, read_at: n.read_at,
+                                            created_at: new Date(n.created_at).toLocaleString(),
+                                        }));
+                                    }).catch(() => {});
+                            },
+                            init() { setInterval(() => this.poll(), 15000); }
+                        }" @click.outside="open = false">
                         <button @click="open = !open"
                             class="relative p-2 text-secondary hover:text-primary hover:bg-surface rounded-xl transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            @if($bellCount > 0)
-                                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full"></span>
-                            @endif
+                            <span x-show="count > 0" class="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full"></span>
                         </button>
 
                         {{-- Dropdown --}}
@@ -136,14 +156,12 @@
 
                             <div class="px-4 py-3 border-b border-border flex items-center justify-between">
                                 <p class="font-semibold text-primary text-sm">Notifications</p>
-                                @if($bellCount > 0)
-                                    <span class="px-2 py-0.5 bg-warning-bg text-warning text-xs font-semibold rounded-full">
-                                        {{ $bellCount }} unread
-                                    </span>
-                                @endif
+                                <span x-show="count > 0" class="px-2 py-0.5 bg-warning-bg text-warning text-xs font-semibold rounded-full">
+                                    <span x-text="count"></span> unread
+                                </span>
                             </div>
 
-                            @if($bellNotifs->isEmpty())
+                            <template x-if="items.length === 0">
                                 <div class="px-4 py-8 text-center text-muted text-sm">
                                     <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -152,63 +170,38 @@
                                     </svg>
                                     No notifications yet
                                 </div>
-                            @else
-                                <div class="divide-y divide-border max-h-72 overflow-y-auto">
-                                    @foreach($bellNotifs as $notif)
-                                        <a href="{{ $bellRoute }}?notification_id={{ $notif->id }}"
-                                           class="flex items-start gap-3 px-4 py-3 hover:bg-surface/60 transition-colors group">
-                                            <div
-                                                class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5
-                                                {{ $notif->status === 'failed' ? 'bg-danger-bg' : ($notif->channel === 'sms' ? 'bg-info-bg' : 'bg-navy-100') }}">
-                                                @if($notif->status === 'failed')
-                                                    <svg class="w-3.5 h-3.5 text-danger" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                @elseif($notif->channel === 'sms')
-                                                    <svg class="w-3.5 h-3.5 text-info" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                    </svg>
-                                                @else
-                                                    <svg class="w-3.5 h-3.5 text-secondary" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                    </svg>
-                                                @endif
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-xs font-semibold text-primary">
-                                                    {{ ucfirst(str_replace('_', ' ', $notif->type)) }}
-                                                    <span
-                                                        class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold
-                                                        {{ $notif->status === 'failed' ? 'bg-danger-bg text-danger' : 'bg-success-bg text-success' }}">
-                                                        {{ ucfirst($notif->status) }}
-                                                    </span>
-                                                    @if(!$notif->read_at)
-                                                        <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-warning-bg text-warning">
-                                                            Unread
-                                                        </span>
-                                                    @endif
-                                                </p>
-                                                <p class="text-xs text-muted mt-0.5 truncate">{{ $notif->recipient }}</p>
-                                                <p class="text-[10px] text-muted mt-0.5">
-                                                    {{ $notif->created_at->diffForHumans() }}</p>
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                </div>
+                            </template>
 
-                                <div class="px-4 py-3 border-t border-border">
-                                    <a href="{{ $bellRoute }}"
-                                        class="block text-center text-xs font-semibold text-brand-600 hover:text-brand-500 transition-colors">
-                                        View all notifications →
+                            <div class="divide-y divide-border max-h-72 overflow-y-auto" x-show="items.length > 0">
+                                <template x-for="notif in items" :key="notif.id">
+                                    <a :href="'{{ $bellRoute }}?notification_id=' + notif.id"
+                                       class="flex items-start gap-3 px-4 py-3 hover:bg-surface/60 transition-colors group">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-navy-100">
+                                            <svg class="w-3.5 h-3.5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-semibold text-primary">
+                                                <span x-text="notif.type.replace(/_/g, ' ')"></span>
+                                                <template x-if="!notif.read_at">
+                                                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-warning-bg text-warning">Unread</span>
+                                                </template>
+                                            </p>
+                                            <p class="text-xs text-muted mt-0.5 truncate" x-text="notif.recipient"></p>
+                                            <p class="text-[10px] text-muted mt-0.5" x-text="notif.created_at"></p>
+                                        </div>
                                     </a>
-                                </div>
-                            @endif
+                                </template>
+                            </div>
+
+                            <div class="px-4 py-3 border-t border-border">
+                                <a href="{{ $bellRoute }}"
+                                    class="block text-center text-xs font-semibold text-brand-600 hover:text-brand-500 transition-colors">
+                                    View all notifications →
+                                </a>
+                            </div>
                         </div>
                     </div>
 

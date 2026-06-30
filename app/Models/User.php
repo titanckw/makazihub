@@ -11,7 +11,7 @@ class User extends Authenticatable
     use Notifiable, HasRoles;
 
     protected $fillable = [
-        'name', 'email', 'phone', 'password', 'is_active',
+        'name', 'email', 'phone', 'password', 'is_active', 'avatar_path', 'bio',
     ];
 
     protected $hidden = [
@@ -35,6 +35,19 @@ class User extends Authenticatable
         return $this->hasMany(Property::class, 'manager_id');
     }
 
+    public function staffProfile()
+    {
+        return $this->hasOne(Staff::class);
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar_path) {
+            return asset('storage/' . $this->avatar_path);
+        }
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=1B2A4A&color=fff';
+    }
+
     // Helper: get first name only
     public function getFirstNameAttribute(): string
     {
@@ -48,6 +61,7 @@ class User extends Authenticatable
             $this->hasRole('superadmin') => 'Super Admin',
             $this->hasRole('manager')    => 'Manager',
             $this->hasRole('tenant')     => 'Tenant',
+            $this->hasRole('staff')      => 'Staff',
             default                      => 'Unknown',
         };
     }

@@ -10,6 +10,8 @@
         @include('manager.partials.sidebar')
     @elseif(auth()->user()->hasRole('superadmin'))
         @include('superadmin.partials.sidebar')
+    @elseif(auth()->user()->hasRole('staff'))
+        @include('staff.partials.sidebar')
     @else
         @include('tenant.partials.sidebar')
     @endif
@@ -23,6 +25,7 @@
         $notifReadRouteName = match (true) {
             auth()->user()->hasRole('manager') => 'manager.notifications.read',
             auth()->user()->hasRole('superadmin') => 'superadmin.notifications.read',
+            auth()->user()->hasRole('staff') => 'notifications.read',
             default => 'tenant.notifications.read',
         };
 

@@ -120,3 +120,61 @@
     </svg>
     Settings
 </a>
+
+<p class="px-3 pt-5 mb-2 text-xs font-semibold text-white/40 uppercase tracking-widest">Tools</p>
+
+<a href="{{ route('manager.bulk-upload.index') }}"
+    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+          {{ request()->routeIs('manager.bulk-upload.*') ? 'bg-brand-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
+    </svg>
+    Bulk Upload
+</a>
+
+<a href="{{ route('manager.staff.index') }}"
+    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+          {{ request()->routeIs('manager.staff.*') ? 'bg-brand-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6a4 4 0 11-8 0 4 4 0 018 0zM12 11a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+    Staff 
+</a>
+
+<a href="{{ route('manager.attendance.index') }}"
+    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+          {{ request()->routeIs('manager.attendance.*') ? 'bg-brand-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    Attendance
+</a>
+
+<a href="{{ route('manager.leave.index') }}"
+    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+          {{ request()->routeIs('manager.leave.*') ? 'bg-brand-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    Leave Requests
+</a>
+
+<a href="{{ route('manager.documents.index') }}"
+    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+          {{ request()->routeIs('manager.documents.*') ? 'bg-brand-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Staff Documents
+</a>
+
+<a href="{{ route('manager.chat.index') }}"
+    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+          {{ request()->routeIs('manager.chat.*') ? 'bg-brand-600 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+    Staff Chat
+</a>

@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Models\AttendanceLog;
+use App\Models\ChatMessage;
+use App\Models\LeaveRequest;
 use App\Models\Property;
+use App\Models\Staff;
+use App\Models\StaffDocument;
 use App\Models\Unit;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -70,6 +75,32 @@ class DashboardController extends Controller
             ->withCount(['units', 'units as occupied_count' => fn($q) => $q->where('status', 'occupied')])
             ->get();
 
-        return view('manager.dashboard', compact('stats', 'overdueInvoices', 'recentPayments', 'maintenanceRequests', 'properties'));
+        // ---------------------------------------------------------------
+        // Staff Management summary (attendance, leave, chat, documents)
+        // ---------------------------------------------------------------
+        $staffIds = Staff::where('manager_id', $managerId)->pluck('id');
+
+        $staffStats = [
+            'total_staff' => Staff::where('manager_id', $managerId)->where('status', 'active')->count(),
+            'present_today' => AttendanceLog::whereIn('staff_id', $staffIds)
+                ->whereDate('date', now()->toDateString())
+                ->whereIn('status', ['present', 'late'])
+                ->count(),
+            'pending_leave' => LeaveRequest::whereIn('staff_id', $staffIds)->where('status', 'pending')->count(),
+            'total_documents' => StaffDocument::whereIn('staff_id', $staffIds)->count(),
+            'unread_messages' => ChatMessage::where('recipient_id', $managerId)->whereNull('read_at')->count(),
+        ];
+
+        $pendingLeaveRequests = LeaveRequest::with('staff.user')
+            ->whereIn('staff_id', $staffIds)
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('manager.dashboard', compact(
+            'stats', 'overdueInvoices', 'recentPayments', 'maintenanceRequests', 'properties',
+            'staffStats', 'pendingLeaveRequests'
+        ));
     }
 }
